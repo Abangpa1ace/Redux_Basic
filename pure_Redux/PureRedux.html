@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.0-beta.1/redux.js" integrity="sha512-a18iH5k0MJdFLaOvN1STjT2wNpH4tjIKSuWXZOZ7nWxkMydoMGZCkQ88Ch/RnAVzVVNVfhl3dxyg5UKABKhr0Q==" crossorigin="anonymous"></script>
+  <title>Pure Redux</title>
+</head>
+<body>
+  <div class="title"></div>
+  <div class="links"></div>
+  <div class="controls"></div>
+  <div class="content"></div>
+
+  <script>
+// Redux
+const reducer = (state, action) => {
+  if (!state) {
+    return {
+      mode:'welcome',
+      selectedId: 1,
+      contents: [
+        {
+          id: 1, 
+          title: 'HTML',
+          desc: 'HTML is...'
+        },
+        {
+          id: 2, 
+          title: 'CSS',
+          desc: 'CSS also...'
+        },
+      ]
+    }
+  }
+
+  let newState = {};
+  if (action.type === 'CHANGE') {
+    Object.assign(newState, state, {mode: action.mode})
+  }
+  else if (action.type === 'SELECT') {
+    Object.assign(newState, state, {mode: action.mode, selectedId: action.id})
+  }
+  else if (action.type === 'CREATE') {
+    const addContent = {id: state.contents.length + 1, title: action.title, desc: action.desc,}
+    const newContents = state.contents.concat(addContent)
+    Object.assign(newState, state, {mode: 'read', contents: newContents})
+  }
+  else if (action.type === 'DELETE') {
+    const newId = state.contents[0].id
+    const newContents = state.contents.filter(item => item.id !== state.selectedId)
+    Object.assign(newState, state, {selectedId: newId, contents: newContents})
+  }
+  return newState;
+}
+
+let store = Redux.createStore(reducer);
+
+
+// App Components
+const Title = () => {
+  document.querySelector('.title').innerHTML = `
+    <header>
+      <h1>WEB</h1>
+      Hello, WEB!
+    </header>
+  `;
+}
+
+const Links = () => {
+  const { contents } = store.getState();
+  let listTags = '';
+  for (let item of contents) {
+    listTags += `
+      <li>
+        <a href="${item.id}.html"
+          onclick="
+            event.preventDefault();
+            store.dispatch({
+              type: 'SELECT',
+              mode: 'read',
+              id: ${item.id},
+            })
+          "
+        >${item.title}</a>
+      </li>
+    `;
+  }
+
+  document.querySelector('.links').innerHTML = `
+    <nav>
+      <ol>${listTags}</ol>
+    </nav>
+  `;
+}
+
+const Controls = () => {
+  document.querySelector('.controls').innerHTML = `
+    <section>
+      <a href="/create"
+        onclick="
+          event.preventDefault();
+          store.dispatch({
+            type: 'CHANGE',
+            mode: 'create',
+          })
+        "
+      >create</a>
+      <input type="button" value="delete"
+        onclick="
+          store.dispatch({
+            type: 'DELETE',
+          })
+        "
+      />
+    </section>
+  `;
+}
+
+const Content = () => {
+  const { mode, selectedId, contents } = store.getState();
+  if (mode === 'welcome') {
+    document.querySelector('.content').innerHTML = `
+      <article>
+        <h2>Welcome!</h2>
+        <p>This is Redux!!</p>
+      </article>
+    `;
+  }
+  else if (mode === 'read') {
+    let renderItem;
+    for (let item of contents) {
+      if (item.id === selectedId) {
+        renderItem = item;
+        break;
+      }
+    }
+    document.querySelector('.content').innerHTML = `
+      <article>
+        <h2>${renderItem.title}</h2>
+        <p>${renderItem.desc}</p>
+      </article>
+    `;
+  }
+  else if (mode === 'create') {
+    document.querySelector('.content').innerHTML = `
+      <article>
+        <form onsubmit="
+          event.preventDefault();
+          const title = this.title.value
+          const desc = this.desc.value
+          store.dispatch({
+            type: 'CREATE',
+            title,
+            desc,
+          })
+        ">
+          <p>
+            <input type="text" name="title" placeholder="title" />
+          </p>
+          <p>
+            <textarea name="desc" placeholder="description"></textarea>
+          </p>
+          <p>
+            <input type="submit" />
+          </p>
+        </form>
+      </article>
+    `;
+  }
+  
+  
+
+}
+
+Title();
+Links();
+Controls();
+Content();
+store.subscribe(Links);
+store.subscribe(Content);
+
+  </script>
+</body>
+</html>
