@@ -12,8 +12,8 @@ function App() {
       <h1>Counter: {counter}</h1>
       {isLogged && <h3>Valuable Information I shouldn't see.</h3>}
 
-      <button onClick={() => dispatch(increment(3))}>+</button>
-      <button onClick={() => dispatch(decrement(2))}>-</button>
+      <button onClick={() => dispatch(increment(1))}>+</button>
+      <button onClick={() => dispatch(decrement(1))}>-</button>
     </div>
   );
 }
