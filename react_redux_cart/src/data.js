@@ -2,7 +2,7 @@ export const DATA = [
   {
     id: 1,
     title: 'Samsung Galaxy S8',
-    price: 399.99,
+    price: 892.99,
     img:
       'https://res.cloudinary.com/diqqf3eq2/image/upload/v1583368215/phone-2_ohtt5s.png',
     amount: 1,

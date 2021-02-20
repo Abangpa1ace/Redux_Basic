@@ -12,18 +12,24 @@ function App() {
   const list = useSelector(state => state.cart.list);
 
   const dispatch = useDispatch();
-  const fetchList = async () => {
+  
+  const fetchData = async () => {
     dispatch(loadStart());
-    const res = await fetch(DATA_API);
-    const cartList = await res.json();
-    dispatch({ type: 'FETCHCART', cartList});
-    dispatch(loadEnd());
+    try {
+      const res = await fetch(DATA_API);
+      const cartList = await res.json();
+      await dispatch(fetchList(cartList));	// 디스패치에 함수 적용
+      dispatch(loadEnd());
+    }
+    catch(err) {
+      alert(err);
+    }
   }
 
   useEffect(() => {
-    fetchList();
-  }, []);
-
+    fetchData()
+  }, [])
+    
   useEffect(() => {
     dispatch(calculate());
   }, [list]);
